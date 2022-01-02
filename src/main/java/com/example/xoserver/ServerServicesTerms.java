@@ -17,6 +17,4 @@ public interface ServerServicesTerms {
 
     boolean sendAnswerRequestToTheOpponent(String destinationPortWithInfo);
 
-
-
 }

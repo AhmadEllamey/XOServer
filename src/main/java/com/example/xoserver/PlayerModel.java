@@ -9,6 +9,9 @@ public class PlayerModel {
     private String name ;
 
 
+    public PlayerModel() {
+    }
+
     public PlayerModel(String username, String password, String mail, String phone, String name) {
         this.username = username;
         this.password = password;

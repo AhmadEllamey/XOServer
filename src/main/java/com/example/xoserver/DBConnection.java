@@ -16,7 +16,7 @@ public class DBConnection {
             Class.forName(driverName); // here is the ClassNotFoundException
 
             String serverName = "localhost";
-            String myDatabase = "cafe_data_base";
+            String myDatabase = "XOGameDatabase";
             String url = "jdbc:mysql://" + serverName + "/" + myDatabase;
 
             String username = "root";

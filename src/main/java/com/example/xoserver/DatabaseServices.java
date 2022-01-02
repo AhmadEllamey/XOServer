@@ -1,6 +1,16 @@
 package com.example.xoserver;
 
+
+
 public class DatabaseServices implements DatabaseServicesTerms {
+
+
+    public DatabaseServices(){
+
+        PlayerModel playerModel = new PlayerModel();
+
+
+    }
 
 
     @Override
@@ -37,4 +47,6 @@ public class DatabaseServices implements DatabaseServicesTerms {
     public String viewGame() {
         return null;
     }
+
+
 }
