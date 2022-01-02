@@ -1,0 +1,43 @@
+package com.example.xoserver;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+
+public class DBConnection {
+
+    public static Connection connection;
+
+
+    public static void OpenConnection(){
+
+        try {
+            String driverName = "com.mysql.jdbc.Driver";
+            Class.forName(driverName); // here is the ClassNotFoundException
+
+            String serverName = "localhost";
+            String myDatabase = "cafe_data_base";
+            String url = "jdbc:mysql://" + serverName + "/" + myDatabase;
+
+            String username = "root";
+            String password = "";
+            connection = DriverManager.getConnection(url, username, password);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public static void CloseConnection(){
+        try {
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}
+
