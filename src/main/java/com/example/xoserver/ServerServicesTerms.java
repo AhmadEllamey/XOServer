@@ -1,20 +1,27 @@
 package com.example.xoserver;
+import org.json.*;
+import java.util.Vector;
 
 public interface ServerServicesTerms {
 
 
-    String sendTheUserHisIndexInTheServer(String info);
+    boolean sendPlayRequestToTheOpponent(JSONObject jsonObject);
 
-    String sendTheUserTheIndexOfHisOpponentInTheServer(String info);
+    boolean sendAnswerRequestToTheOpponent(JSONObject jsonObject);
 
-    String[] updateTheOnlinePlayersList();
+    boolean iWonTheGame(JSONObject jsonObject);
 
-    boolean updateTheGameBoard(String destinationPortWithInfo);
+    boolean updateTheGameBoard(JSONObject jsonObject);
 
-    boolean updateTheGameState(String destinationPortWithInfo);
+    String getTheOnlineUsers(Vector<?> clientsVector , Vector<String> clientsVectorNames , Vector<String> available);
 
-    boolean sendPlayRequestToTheOpponent(String destinationPortWithInfo);
+    boolean endTheGameNormally(JSONObject jsonObject);
 
-    boolean sendAnswerRequestToTheOpponent(String destinationPortWithInfo);
+    boolean endTheGameWithSurrender(JSONObject jsonObject);
+
+    boolean requestDrawFromTheOpponent(JSONObject jsonObject);
+
+    String getTheServerLeaderBoard(JSONObject jsonObject);
+
 
 }

@@ -5,6 +5,7 @@ module com.example.xoserver {
     requires javafx.fxml;
     requires com.jfoenix;
     requires java.sql;
+    requires org.json;
 
 
     opens com.example.xoserver to javafx.fxml;

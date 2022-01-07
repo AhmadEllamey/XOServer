@@ -1,21 +1,25 @@
 package com.example.xoserver;
 
+import org.json.JSONObject;
+
 public interface DatabaseServicesTerms {
 
 
-    boolean login(String username , String password);
+    String login(JSONObject jsonObject);
 
-    boolean register(String username , String password , String name , String mail , String phone);
+    boolean register(JSONObject jsonObject);
 
-    PlayerModel getUserData();
+    String getUserData(JSONObject jsonObject);
 
-    boolean updateProfile(String username , String password , String name , String mail , String phone);
+    boolean updateProfile(JSONObject jsonObject);
 
-    boolean updateScore(String username ,String newScore);
+    boolean updateScore(JSONObject jsonObject);
 
-    boolean saveGame(String username , String gameNumber , String opponentPlayerUserName , String filePath);
+    boolean saveGame(JSONObject jsonObject);
 
-    String viewGame();
+    String viewGames(JSONObject jsonObject);
+
+    String viewGameFlow(JSONObject jsonObject);
 
 
 }
