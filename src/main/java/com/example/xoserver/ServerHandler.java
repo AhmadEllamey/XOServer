@@ -111,7 +111,7 @@ class ServerHandler extends Thread{
                     printStream.close();
                     clientsVector.remove(this);
                     clientsVectorNames.remove(String.valueOf(clientNameInServer));
-                    // ToDO should i break the loop ?????????
+                    // ToDo should i break the loop ?????????
                     //break ;
 
                 } catch (IOException e) {

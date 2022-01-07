@@ -1,6 +1,7 @@
 
 package com.example.xoserver;
 import com.jfoenix.controls.JFXToggleButton;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,27 +31,45 @@ public class ServerScreenController implements Initializable {
 
     ServerSocket myServerSocket;
 
-    int flag ;
+    /*
+     - why we use initialize .
+            The constructor is called first, then any @FXML annotated fields are populated,
+             then initialize() is called. This means the constructor does not have access
+              to @FXML fields referring to components defined in the .
+               fxml file, while initialize() does have access to them.
+
+     */
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         // ToDo what happened when the Screen is loading (as a constructor for the screen)
-
         restartServerButton.setDisable(true);
-        flag = 0 ;
 
     }
 
     public ServerScreenController(){
 
-        if(flag ==1 ){
+    }
 
+    public void serverControllerFunction(){
+
+        new Thread(() -> {
             try {
+                try{
+                    myServerSocket.close();
+                    System.out.println("This Socket Is Closed Now");
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println("This Socket Is Not Opened To Be Closed");
+                }
                 myServerSocket = new ServerSocket(5005);
+                Platform.runLater(() ->restartServerButton.setDisable(false));
+                Platform.runLater(() ->serverStatesToggleButton.setDisable(false));
+                System.out.println("We Are In The Connection lol .... :)");
                 //restartServerButton.setDisable(false);
-                flag = 0 ;
                 while(true){
+                    System.out.println("We Are In The Connection loop lol .... :)");
 
                     Socket s = myServerSocket.accept();
                     new ServerHandler(s);
@@ -59,8 +78,7 @@ public class ServerScreenController implements Initializable {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-
-        }
+        }).start();
 
     }
 
@@ -68,17 +86,9 @@ public class ServerScreenController implements Initializable {
 
     @FXML
     void manageRestartServerButton(ActionEvent event) {
-
-        try {
-            myServerSocket.close();
-            System.out.println("Server Shut Down Correctly ...");
-            new ServerScreenController();
-            System.out.println("Server Opened Again Correctly ...");
-            restartServerButton.setDisable(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        restartServerButton.setDisable(true);
+        serverStatesToggleButton.setDisable(true);
+        serverControllerFunction();
     }
 
     @FXML
@@ -86,16 +96,16 @@ public class ServerScreenController implements Initializable {
 
         if(serverStatesToggleButton.isSelected()){
 
-            flag = 1 ;
-            new ServerScreenController();
-            restartServerButton.setDisable(false);
+            System.out.println("Congrats The Server Is Running Now ... :)");
+            serverControllerFunction();
+
 
         }else {
 
             try {
                 myServerSocket.close();
-                flag = 0 ;
                 System.out.println("System Shut Down Correctly ...");
+                restartServerButton.setDisable(true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
