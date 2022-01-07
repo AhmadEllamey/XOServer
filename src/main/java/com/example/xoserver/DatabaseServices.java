@@ -18,15 +18,9 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
      for viewGameFlow :
                  "[{\"MovePlace\":\""+SetMovePlaceHere+"\"},....]"
+
     */
 
-
-    public DatabaseServices(){
-
-        PlayerModel playerModel = new PlayerModel();
-
-
-    }
 
     @Override
     public String login(JSONObject jsonObject) {

@@ -30,6 +30,7 @@ public class ServerScreenController implements Initializable {
 
     ServerSocket myServerSocket;
 
+    int flag ;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -37,23 +38,28 @@ public class ServerScreenController implements Initializable {
         // ToDo what happened when the Screen is loading (as a constructor for the screen)
 
         restartServerButton.setDisable(true);
+        flag = 0 ;
 
     }
 
     public ServerScreenController(){
 
+        if(flag ==1 ){
 
-        try {
-            myServerSocket = new ServerSocket(5005);
-            restartServerButton.setDisable(false);
-            while(true){
+            try {
+                myServerSocket = new ServerSocket(5005);
+                //restartServerButton.setDisable(false);
+                flag = 0 ;
+                while(true){
 
-                Socket s = myServerSocket.accept();
-                new ServerHandler(s);
+                    Socket s = myServerSocket.accept();
+                    new ServerHandler(s);
 
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
         }
 
     }
@@ -80,6 +86,7 @@ public class ServerScreenController implements Initializable {
 
         if(serverStatesToggleButton.isSelected()){
 
+            flag = 1 ;
             new ServerScreenController();
             restartServerButton.setDisable(false);
 
@@ -87,10 +94,12 @@ public class ServerScreenController implements Initializable {
 
             try {
                 myServerSocket.close();
+                flag = 0 ;
                 System.out.println("System Shut Down Correctly ...");
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
 
         }
 
