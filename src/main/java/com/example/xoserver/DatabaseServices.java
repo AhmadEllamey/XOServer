@@ -3,6 +3,12 @@ package com.example.xoserver;
 
 import org.json.JSONObject;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Optional;
+
+import static com.example.xoserver.DBConnection.*;
+
 public class DatabaseServices implements DatabaseServicesTerms {
 
 
@@ -24,7 +30,30 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public String login(JSONObject jsonObject) {
-        return null;
+        String jasonObjectString = "";
+        try{
+            OpenConnection();
+            String userName = jsonObject.getString("UserName");
+            String password = jsonObject.getString("Password");
+
+            Statement CheckTheUser =  connection.createStatement();
+            String Check = "SELECT * FROM player WHERE UserName = '"+userName+
+                    "' AND password = '"+password+"'";
+            ResultSet resultSet = CheckTheUser.executeQuery(Check);
+
+            if(resultSet.next()){
+                jasonObjectString ="{\"UserName\": \""+userName+"\", \"UserEmail\": \""+resultSet.getString("Email")
+                        +"\", \"UserPhone\": \""+resultSet.getString("Phone")
+                        +"\", \"TotalGames\": \""+resultSet.getString("TotalGames")
+                        +"\", \"TotalScore\": \""+resultSet.getString("TotalScore")+"\"}";
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        CloseConnection();
+
+        return jasonObjectString;
     }
 
     @Override
@@ -44,7 +73,22 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public boolean updateScore(JSONObject jsonObject) {
-        return false;
+
+        boolean returnType = false ;
+        try{
+            OpenConnection();
+            String userName = jsonObject.getString("UserName");
+            Statement updateTheScore =  connection.createStatement();
+            String updateScore = "UPDATE player SET TotalGame = TotalGame + 1  , TotalScore = TotalScore + 3 WHERE UserName = '"+userName+"'";
+            updateTheScore.executeUpdate(updateScore);
+            returnType = true ;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        CloseConnection();
+
+
+        return returnType;
     }
 
     @Override
@@ -59,6 +103,11 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public String viewGameFlow(JSONObject jsonObject) {
+        return null;
+    }
+
+    @Override
+    public String getTheServerLeaderBoard(JSONObject jsonObject) {
         return null;
     }
 }

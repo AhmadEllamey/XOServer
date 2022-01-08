@@ -21,7 +21,6 @@ public interface ServerServicesTerms {
 
     boolean requestDrawFromTheOpponent(JSONObject jsonObject);
 
-    String getTheServerLeaderBoard(JSONObject jsonObject);
 
 
 }

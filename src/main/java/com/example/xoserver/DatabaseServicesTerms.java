@@ -21,6 +21,8 @@ public interface DatabaseServicesTerms {
 
     String viewGameFlow(JSONObject jsonObject);
 
+    String getTheServerLeaderBoard(JSONObject jsonObject);
+
 
 }
 

@@ -59,8 +59,5 @@ public class ServerServices implements ServerServicesTerms {
         return false;
     }
 
-    @Override
-    public String getTheServerLeaderBoard(JSONObject jsonObject) {
-        return null;
-    }
+
 }
