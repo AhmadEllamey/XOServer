@@ -3,9 +3,10 @@ package com.example.xoserver;
 
 import org.json.JSONObject;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Optional;
 
 import static com.example.xoserver.DBConnection.*;
 
@@ -68,7 +69,21 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public boolean updateProfile(JSONObject jsonObject) {
-        return false;
+        boolean retVal = false;
+        DBConnection.OpenConnection();
+        try {
+            PreparedStatement pst = DBConnection.connection.prepareStatement("UPDATE player SET Email = ?,Phone=? WHERE UserName = ?");
+            pst.setString(1,(String) jsonObject.get("UserEmail"));
+            pst.setString(2,(String) jsonObject.get("UserPhone"));
+            pst.setString(3,(String) jsonObject.get("UserName"));
+
+            retVal = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        DBConnection.CloseConnection();
+
+        return retVal;
     }
 
     @Override
@@ -103,7 +118,28 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public String viewGameFlow(JSONObject jsonObject) {
-        return null;
+        String jsonText = "";
+        try {
+            String query = "SELECT * FROM game";
+            Statement stmt = DBConnection.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            while (res.next()) {
+                if (res.getString("Player_1").equals((String) jsonObject.get("UserName"))) {
+                    String gameMovements = res.getString("Game_Movements");
+                    jsonText = jsonText + "{\"moveIndex\":\"" + gameMovements + "\"}";
+                } else if (res.getString("Player_2").equals((String) jsonObject.get("UserName"))) {
+                    String gameMovements = res.getString("Game_Movements");
+                    jsonText = jsonText + "{\"moveIndex\":\"" + gameMovements + "\"}";
+                }
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        DBConnection.CloseConnection();
+
+        return jsonText;
+
     }
 
     @Override

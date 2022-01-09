@@ -19,8 +19,8 @@ class ServerHandler extends Thread{
     Object clientNameInServer;
     boolean isThisIsTheFirstConnectionWithTheServer;
 
-
-
+    //------------------
+    DatabaseServices databaseServices = new DatabaseServices();
 
     public ServerHandler(Socket cs){
         try {
@@ -47,6 +47,7 @@ class ServerHandler extends Thread{
                     if(incomingLine.equals("Please I need My Thread Name !")){
                         sendMessageToSender(String.valueOf(clientNameInServer));
                         isThisIsTheFirstConnectionWithTheServer = true ;
+
                     }
                 }else{
 
@@ -56,9 +57,12 @@ class ServerHandler extends Thread{
                             String functionMode = jsonObject.getString("functionMode");
                             if(functionMode != null){
                                 // the server redirect the message after checking the mode of the function
+                                String destName = "";
+                                int destIndex = clientsVectorNames.indexOf(destName);
                                 switch (functionMode){
 
                                     // database services
+
                                     case "loginRequest" :
 
                                     case "registerRequest" :
@@ -66,10 +70,24 @@ class ServerHandler extends Thread{
                                     case "getUserInfoRequest" :
 
                                     case "updateUserInfoRequest" :
+                                        if (databaseServices.updateProfile(jsonObject)){
+                                            sendMessageToDestination("Updated Successfully", destIndex);
+                                        }
+                                        else{
+                                            sendMessageToDestination("update failed",destIndex);
+                                        }
+                                        break;
 
                                     case "updateScoreInfoRequest" :
 
                                     case "saveTheGameRequest" :
+                                        if (databaseServices.updateProfile(jsonObject)){
+                                            sendMessageToDestination("save Successfully", destIndex);
+                                        }
+                                        else{
+                                            sendMessageToDestination("Save Failed",destIndex);
+                                        }
+                                        break;
 
                                     case "viewTheGameRequest" :
 
@@ -81,6 +99,7 @@ class ServerHandler extends Thread{
                                     case "sendAnswerToPlayRequest" :
 
                                     case "sendIWonRequest" :
+                                        sendMessageToDestination("ya loser",destIndex);
 
                                     case "sendUpdateTheGameBoardRequest" :
 
@@ -91,6 +110,7 @@ class ServerHandler extends Thread{
                                     case "endGameRequestWithSurrenderRequest" :
 
                                     case "requestDrawFromTheOpponentRequest" :
+                                        sendMessageToDestination("draw request", destIndex);
 
                                     case "getTheRankOfPlayersOnTheServerRequest" :
 

@@ -60,7 +60,7 @@ public class ServerScreenController implements Initializable {
                     myServerSocket.close();
                     System.out.println("This Socket Is Closed Now");
                 }catch (Exception e){
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     System.out.println("This Socket Is Not Opened To Be Closed");
                 }
                 myServerSocket = new ServerSocket(5005);
@@ -81,6 +81,8 @@ public class ServerScreenController implements Initializable {
         }).start();
 
     }
+
+
 
 
 
