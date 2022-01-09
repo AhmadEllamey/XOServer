@@ -64,7 +64,21 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public String getUserData(JSONObject jsonObject) {
-        return null;
+         OpenConnection();
+         DBConnection dbConnection;
+         PreparedStatement stmt;
+
+        String userData=null;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM Player where UserName =?");
+            stmt.setString(1,jsonObject.getString("UserName"));
+            ResultSet rs =stmt.executeQuery();
+            userData="UserName\": \""+rs.getString("UserName ")+"\", \"UserEmail\": \""+rs.getString("Email ")+"\", \"UserPhone\": \""+rs.getString("Phone")+"\", \"TotalGames\": \""+rs.getString("TotalGame ")+"\", \"TotalScore\": \""+rs.getString("TotalScore ")+"\"}";
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return userData;
     }
 
     @Override
@@ -113,7 +127,28 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
     @Override
     public String viewGames(JSONObject jsonObject) {
-        return null;
+        OpenConnection();
+        DBConnection dbConnection;
+        PreparedStatement stmt;
+        String gameData=null;
+        try {
+
+            stmt = connection.prepareStatement("SELECT * FROM game");
+            ResultSet rs =stmt.executeQuery();
+            if(rs.next()){
+                if(rs.getString("Player_1 ")==jsonObject.getString("UserName")){
+                    gameData="{\"GameNumber\":\""+rs.getString("Game_Number  ")+"\",\"OpponentPlayer\":\""+rs.getString(" Player_2")+"\",\"GameTime\":\""+rs.getString("Game_Time ")+"\"}";
+                }
+                else if(rs.getString("Player_2 ")==jsonObject.getString("UserName")){
+                    gameData=gameData="{\"GameNumber\":\""+rs.getString("Game_Number  ")+"\",\"OpponentPlayer\":\""+rs.getString(" Player_1")+"\",\"GameTime\":\""+rs.getString("Game_Time ")+"\"}";
+                }
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return gameData;
     }
 
     @Override
