@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="xogamedatabase@localhost" uuid="85b9e342-67dd-42d8-8299-3921bc8fe833">
+    <data-source source="LOCAL" name="xogamedatabase@localhost [2]" uuid="1ebb26fe-484e-427b-847b-444108178f06">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://localhost:3306/xogamedatabase</jdbc-url>
+      <jdbc-url>jdbc:mysql://localhost:3307/xogamedatabase</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="xogamedatabase@localhost [3]" uuid="dfea49a4-99c9-43ed-8f41-0ab96d72cac9">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3307/xogamedatabase</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

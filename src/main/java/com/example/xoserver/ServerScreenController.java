@@ -85,6 +85,8 @@ public class ServerScreenController implements Initializable {
 
 
 
+
+
     @FXML
     void manageRestartServerButton(ActionEvent event) {
         restartServerButton.setDisable(true);

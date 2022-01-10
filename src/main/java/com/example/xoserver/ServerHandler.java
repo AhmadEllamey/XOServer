@@ -21,8 +21,8 @@ class ServerHandler extends Thread{
     Object clientNameInServer;
     boolean isThisIsTheFirstConnectionWithTheServer;
 
-
-
+    //------------------
+    DatabaseServices databaseServices = new DatabaseServices();
 
     public ServerHandler(Socket cs){
         try {
@@ -52,6 +52,7 @@ class ServerHandler extends Thread{
                     if(incomingLine.equals("Please I need My Thread Name !")){
                         sendMessageToSender(String.valueOf(clientNameInServer));
                         isThisIsTheFirstConnectionWithTheServer = true ;
+
                     }
                 }else{
 
@@ -70,9 +71,12 @@ class ServerHandler extends Thread{
                             System.out.println(jsonObject.getString("Password"));
                             if(functionMode != null){
                                 // the server redirect the message after checking the mode of the function
+                                String destName = "";
+                                int destIndex = clientsVectorNames.indexOf(destName);
                                 switch (functionMode){
 
                                     // database services
+
                                     case "loginRequest" :
                                         System.out.println("We are at log in case");
                                         sendMessageToSender(databaseServices.login(jsonObject));
@@ -97,14 +101,14 @@ class ServerHandler extends Thread{
                                         sendMessageToSender(databaseServices.getUserData(jsonObject));
                                         break;
                                     case "updateUserInfoRequest" :
-                                        String message2 ;
-                                        if(!databaseServices.updateProfile(jsonObject)){
-                                            message2 = "UpdateProfileFailed";
-                                        }else{
-                                            message2 = "UpdateProfileAccepted";
+                                        if (databaseServices.updateProfile(jsonObject)){
+                                            sendMessageToDestination("Updated Successfully", destIndex);
                                         }
-                                        sendMessageToSender(message2);
+                                        else{
+                                            sendMessageToDestination("update failed",destIndex);
+                                        }
                                         break;
+
                                     case "updateScoreInfoRequest" :
                                         String message3 ;
                                         if(!databaseServices.updateScore(jsonObject)){
@@ -115,14 +119,14 @@ class ServerHandler extends Thread{
                                         sendMessageToSender(message3);
                                         break;
                                     case "saveTheGameRequest" :
-                                        String message4 ;
-                                        if(!databaseServices.saveGame(jsonObject)){
-                                            message4 = "SaveGameFailed";
-                                        }else{
-                                            message4 = "SaveGameAccepted";
+                                        if (databaseServices.updateProfile(jsonObject)){
+                                            sendMessageToDestination("save Successfully", destIndex);
                                         }
-                                        sendMessageToSender(message4);
+                                        else{
+                                            sendMessageToDestination("Save Failed",destIndex);
+                                        }
                                         break;
+
                                     case "viewTheGameRequest" :
                                         sendMessageToSender(databaseServices.viewGameFlow(jsonObject));
                                         break;
@@ -148,12 +152,9 @@ class ServerHandler extends Thread{
                                         }
                                         break;
                                     case "sendIWonRequest" :
-                                        try{
-                                            sendMessageToDestination(incomingLine,receiverIP);
-                                        }catch (Exception e){
-                                            sendMessageToSender("sendIWonRequestFailed");
-                                        }
+                                        sendMessageToDestination("you lose",destIndex);
                                         break;
+
                                     case "sendUpdateTheGameBoardRequest" :
                                         try{
                                             sendMessageToDestination(incomingLine,receiverIP);

@@ -194,26 +194,8 @@ public class DatabaseServices implements DatabaseServicesTerms {
     }
 
     @Override
-    public synchronized String viewGameFlow(JSONObject jsonObject) {
-        PreparedStatement stmt;
-        String gameData = null ;
-        try {
-            OpenConnection();
-            stmt = connection.prepareStatement("SELECT Game_Movements FROM game where player_1 = '"+
-                    jsonObject.getString("UserName")+
-                    "' AND Game_Number = '"+jsonObject.getString("GameNumber")+"'");
-            ResultSet rs =stmt.executeQuery();
-            if(rs.next()){
-                gameData = rs.getString("Game_Movements");
-             }
-        }catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return gameData;
-    }
 
-    @Override
     public synchronized String getTheServerLeaderBoard(JSONObject jsonObject) {
 
         PreparedStatement stmt;
@@ -236,6 +218,31 @@ public class DatabaseServices implements DatabaseServicesTerms {
         }
 
         return playerData;
+    }
+    public synchronized String viewGameFlow(JSONObject jsonObject) {
+        String jsonText = "[";
+
+        try {
+            String query = "SELECT * FROM game";
+            Statement stmt = DBConnection.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            while (res.next()) {
+                if (res.getString("Player_1").equals(jsonObject.get("UserName"))) {
+                    String gameMovements = res.getString("Game_Movements");
+                    jsonText = jsonText + "{\"moveIndex\":\"" + gameMovements + "\"}";
+                } else if (res.getString("Player_2").equals(jsonObject.get("UserName"))) {
+                    String gameMovements = res.getString("Game_Movements");
+                    jsonText = jsonText + "{\"moveIndex\":\"" + gameMovements + "\"}";
+                }
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        jsonText = jsonText.substring(0, jsonText.length()-1)+ "]" ;
+        DBConnection.CloseConnection();
+        return jsonText;
 
     }
 
