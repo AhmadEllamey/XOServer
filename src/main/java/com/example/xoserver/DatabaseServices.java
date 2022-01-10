@@ -152,17 +152,18 @@ public class DatabaseServices implements DatabaseServicesTerms {
     }
 
     @Override
-    public String viewGameFlow(JSONObject jsonObject) {
-        String jsonText = "";
+    public synchronized String viewGameFlow(JSONObject jsonObject) {
+        String jsonText = "[";
+
         try {
             String query = "SELECT * FROM game";
             Statement stmt = DBConnection.connection.createStatement();
             ResultSet res = stmt.executeQuery(query);
             while (res.next()) {
-                if (res.getString("Player_1").equals((String) jsonObject.get("UserName"))) {
+                if (res.getString("Player_1").equals(jsonObject.get("UserName"))) {
                     String gameMovements = res.getString("Game_Movements");
                     jsonText = jsonText + "{\"moveIndex\":\"" + gameMovements + "\"}";
-                } else if (res.getString("Player_2").equals((String) jsonObject.get("UserName"))) {
+                } else if (res.getString("Player_2").equals(jsonObject.get("UserName"))) {
                     String gameMovements = res.getString("Game_Movements");
                     jsonText = jsonText + "{\"moveIndex\":\"" + gameMovements + "\"}";
                 }
@@ -172,7 +173,7 @@ public class DatabaseServices implements DatabaseServicesTerms {
             e.printStackTrace();
         }
         DBConnection.CloseConnection();
-
+        jsonText = jsonText.substring(0, jsonText.length()-1)+ "]" ;
         return jsonText;
 
     }
