@@ -10,8 +10,10 @@ import org.json.*;
 class ServerHandler extends Thread{
 
 
-    static Vector<ServerHandler> clientsVector = new Vector<ServerHandler>();
-    static Vector<String> clientsVectorNames = new Vector<String>();
+    static Vector<ServerHandler> clientsVector = new Vector<>();
+    static Vector<String> clientsVectorNames = new Vector<>();
+    static Vector<Boolean> clientsVectorStates = new Vector<>();
+    static Vector<String> clientsVectorRealNames = new Vector<>();
 
     DataInputStream dataInputStream;
     PrintStream printStream;
@@ -39,10 +41,13 @@ class ServerHandler extends Thread{
 
     public void run(){
 
+        DatabaseServices databaseServices = new DatabaseServices();
+
         while(true){
 
             try {
                 String incomingLine = dataInputStream.readLine();
+                System.out.println(incomingLine);
                 if(!isThisIsTheFirstConnectionWithTheServer){
                     if(incomingLine.equals("Please I need My Thread Name !")){
                         sendMessageToSender(String.valueOf(clientNameInServer));
@@ -51,69 +56,165 @@ class ServerHandler extends Thread{
                 }else{
 
                     if(incomingLine != null){
-                        try{
+
                             JSONObject jsonObject= new JSONObject(incomingLine);
-                            String functionMode = jsonObject.getString("functionMode");
+                            String functionMode = jsonObject.getString("FunctionMode");
+                            String Sender = jsonObject.getString("From");
+                            String Receiver = jsonObject.getString("To");
+                            int senderIP = ServerHandler.clientsVectorNames.indexOf(Sender) ;
+                            int receiverIP = ServerHandler.clientsVectorNames.indexOf(Receiver) ;
+                            System.out.println(jsonObject.getString("FunctionMode"));
+                            System.out.println(jsonObject.getString("From"));
+                            System.out.println(jsonObject.getString("To"));
+                            System.out.println(jsonObject.getString("UserName"));
+                            System.out.println(jsonObject.getString("Password"));
                             if(functionMode != null){
                                 // the server redirect the message after checking the mode of the function
                                 switch (functionMode){
 
                                     // database services
                                     case "loginRequest" :
-
+                                        System.out.println("We are at log in case");
+                                        sendMessageToSender(databaseServices.login(jsonObject));
+                                        /*
+                                        if(databaseServices.login(jsonObject)!=null){
+                                            ServerHandler.clientsVectorRealNames.add(jsonObject.getString("UserName"));
+                                            ServerHandler.clientsVectorStates.add(true);
+                                            sendMessageToSender(databaseServices.getTheServerOnlinePlayers());
+                                        }
+                                         */
+                                        break;
                                     case "registerRequest" :
-
+                                        String message ;
+                                        if(!databaseServices.register(jsonObject)){
+                                            message = "RegistrationFailed";
+                                        }else{
+                                            message = "RegistrationAccepted";
+                                        }
+                                        sendMessageToSender(message);
+                                        break;
                                     case "getUserInfoRequest" :
-
+                                        sendMessageToSender(databaseServices.getUserData(jsonObject));
+                                        break;
                                     case "updateUserInfoRequest" :
-
+                                        String message2 ;
+                                        if(!databaseServices.updateProfile(jsonObject)){
+                                            message2 = "UpdateProfileFailed";
+                                        }else{
+                                            message2 = "UpdateProfileAccepted";
+                                        }
+                                        sendMessageToSender(message2);
+                                        break;
                                     case "updateScoreInfoRequest" :
-
+                                        String message3 ;
+                                        if(!databaseServices.updateScore(jsonObject)){
+                                            message3 = "UpdateScoreFailed";
+                                        }else{
+                                            message3 = "UpdateScoreAccepted";
+                                        }
+                                        sendMessageToSender(message3);
+                                        break;
                                     case "saveTheGameRequest" :
-
+                                        String message4 ;
+                                        if(!databaseServices.saveGame(jsonObject)){
+                                            message4 = "SaveGameFailed";
+                                        }else{
+                                            message4 = "SaveGameAccepted";
+                                        }
+                                        sendMessageToSender(message4);
+                                        break;
                                     case "viewTheGameRequest" :
-
-
+                                        sendMessageToSender(databaseServices.viewGameFlow(jsonObject));
+                                        break;
+                                    case "viewAllGameRequest" :
+                                        sendMessageToSender(databaseServices.viewGames(jsonObject));
+                                        break;
                                     // server services
-
+                                    case "getTheLeaderBoardPlayers" :
+                                        sendMessageToSender(databaseServices.getTheServerLeaderBoard(jsonObject));
+                                        break;
                                     case "sendPlayRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("sendPlayerRequestFailed");
+                                        }
+                                        break;
                                     case "sendAnswerToPlayRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("yourAnswerRequestFailed");
+                                        }
+                                        break;
                                     case "sendIWonRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("sendIWonRequestFailed");
+                                        }
+                                        break;
                                     case "sendUpdateTheGameBoardRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("UpdateTheGameBoardRequestFailed");
+                                        }
+                                        break;
                                     case "getTheOnlinePlayersOnTheServerRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("getTheOnlinePlayersRequestFailed");
+                                        }
+                                        break;
                                     case "endTheGameNormallyAfterTheGameFinishedRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("endTheGameNormallyAfterTheGameFinishedRequestFailed");
+                                        }
+                                        break;
                                     case "endGameRequestWithSurrenderRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("endGameRequestWithSurrenderRequestFailed");
+                                        }
+                                        break;
                                     case "requestDrawFromTheOpponentRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("requestDrawFromTheOpponentRequestFailed");
+                                        }
+                                        break;
                                     case "getTheRankOfPlayersOnTheServerRequest" :
-
+                                        try{
+                                            sendMessageToDestination(incomingLine,receiverIP);
+                                        }catch (Exception e){
+                                            sendMessageToSender("getTheRankOfPlayersOnTheServerRequestFailed");
+                                        }
+                                        break;
                                 }
+
+                                System.out.println("Finished The Switch");
 
 
                             }
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
                     }
 
                 }
 
             } catch (IOException ex) {
                 try {
-
+                    //ex.printStackTrace();
                     dataInputStream.close();
                     printStream.close();
                     clientsVector.remove(this);
                     clientsVectorNames.remove(String.valueOf(clientNameInServer));
                     // ToDo should i break the loop ?????????
-                    //break ;
+                    break ;
 
                 } catch (IOException e) {
                     e.printStackTrace();

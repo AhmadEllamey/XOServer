@@ -7,9 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Optional;
-
 import static com.example.xoserver.DBConnection.*;
+import static com.example.xoserver.ServerHandler.*;
 
 public class DatabaseServices implements DatabaseServicesTerms {
 
@@ -31,8 +30,8 @@ public class DatabaseServices implements DatabaseServicesTerms {
 
 
     @Override
-    public String login(JSONObject jsonObject) {
-        String jasonObjectString = "";
+    public synchronized String login(JSONObject jsonObject) {
+        String jasonObjectString = null;
         try{
             OpenConnection();
             String userName = jsonObject.getString("UserName");
@@ -44,10 +43,13 @@ public class DatabaseServices implements DatabaseServicesTerms {
             ResultSet resultSet = CheckTheUser.executeQuery(Check);
 
             if(resultSet.next()){
-                jasonObjectString ="{\"UserName\": \""+userName+"\", \"UserEmail\": \""+resultSet.getString("Email")
-                        +"\", \"UserPhone\": \""+resultSet.getString("Phone")
-                        +"\", \"TotalGames\": \""+resultSet.getString("TotalGames")
-                        +"\", \"TotalScore\": \""+resultSet.getString("TotalScore")+"\"}";
+                if(resultSet.getString("password").equals(password)){
+                    jasonObjectString ="{\"UserName\": \""+userName+"\", \"UserEmail\": \""+resultSet.getString("Email")
+                            +"\", \"UserPhone\": \""+resultSet.getString("Phone")
+                            +"\", \"TotalGames\": \""+resultSet.getString("TotalGame")
+                            +"\", \"FunctionMode\": \""+"PassedTheLogIn"
+                            +"\", \"TotalScore\": \""+resultSet.getString("TotalScore")+"\"}";
+                }
             }
 
         }catch (Exception e){
@@ -55,26 +57,48 @@ public class DatabaseServices implements DatabaseServicesTerms {
         }
         CloseConnection();
 
+        System.out.println(jasonObjectString);
         return jasonObjectString;
     }
 
     @Override
-    public boolean register(JSONObject jsonObject) {
-        return false;
+    public synchronized boolean register(JSONObject jsonObject) {
+
+        boolean retVal = false ;
+
+        try{
+            OpenConnection();
+            Statement registerUser =  connection.createStatement();
+            String userQuery = "INSERT INTO player (UserName, password, Email, Phone) VALUES ('"
+                    +jsonObject.getString("UserName")+
+                    "','"+jsonObject.getString("Password")+
+                    "','"+jsonObject.getString("Email")+
+                    "','"+jsonObject.getString("Phone")+"')";
+            registerUser.executeUpdate(userQuery);
+            retVal = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        CloseConnection();
+        return retVal;
     }
 
     @Override
-    public String getUserData(JSONObject jsonObject) {
+    public synchronized String getUserData(JSONObject jsonObject) {
          OpenConnection();
-         DBConnection dbConnection;
          PreparedStatement stmt;
-
-        String userData=null;
+        String userData = null;
         try {
             stmt = connection.prepareStatement("SELECT * FROM Player where UserName =?");
             stmt.setString(1,jsonObject.getString("UserName"));
             ResultSet rs =stmt.executeQuery();
-            userData="UserName\": \""+rs.getString("UserName ")+"\", \"UserEmail\": \""+rs.getString("Email ")+"\", \"UserPhone\": \""+rs.getString("Phone")+"\", \"TotalGames\": \""+rs.getString("TotalGame ")+"\", \"TotalScore\": \""+rs.getString("TotalScore ")+"\"}";
+            userData="{UserName\": \""+rs.getString("UserName ")+
+                    "\", \"UserEmail\": \""+rs.getString("Email ")+
+                    "\", \"UserPhone\": \""+rs.getString("Phone")+
+                    "\", \"TotalGames\": \""+rs.getString("TotalGame ")+
+                    "\", \"TotalScore\": \""+rs.getString("TotalScore ")+
+                    "\"}";
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -83,12 +107,30 @@ public class DatabaseServices implements DatabaseServicesTerms {
     }
 
     @Override
-    public boolean updateProfile(JSONObject jsonObject) {
-        return false;
+    public synchronized boolean updateProfile(JSONObject jsonObject) {
+        boolean retVal = false ;
+
+        try{
+            OpenConnection();
+
+            Statement updateUser =  connection.createStatement();
+            String userQuery = "UPDATE player SET password = '"+jsonObject.getString("Password")+
+                    "' , Email = '"+jsonObject.getString("Email")+
+                    "' , Phone = '"+jsonObject.getString("Phone")+
+                    "' WHERE UserName = '"+jsonObject.getString("UserName")+"'";
+            updateUser.executeUpdate(userQuery);
+            retVal = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        CloseConnection();
+        return retVal;
+
     }
 
     @Override
-    public boolean updateScore(JSONObject jsonObject) {
+    public synchronized boolean updateScore(JSONObject jsonObject) {
 
         boolean returnType = false ;
         try{
@@ -108,30 +150,63 @@ public class DatabaseServices implements DatabaseServicesTerms {
     }
 
     @Override
-    public boolean saveGame(JSONObject jsonObject) {
-        return false;
+    public synchronized boolean saveGame(JSONObject jsonObject) {
+        boolean retVal = false ;
+        try {
+            OpenConnection();
+            Statement saveTheGame =  connection.createStatement();
+            String gameQuery = "Insert Into game (Game_Number, Player_1, Player_2, Game_Movements) VALUES ('"+
+                    jsonObject.getString("GameNumber")+
+                    "','"+jsonObject.getString("MainPlayer")+
+                    "','"+jsonObject.getString("OpponentPlayer")+
+                    "','"+jsonObject.getString("TheStringTrack")+"')";
+            saveTheGame.executeUpdate(gameQuery);
+            retVal = true ;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        CloseConnection();
+        return retVal;
     }
 
     @Override
-    public String viewGames(JSONObject jsonObject) {
-        OpenConnection();
-        DBConnection dbConnection;
+    public synchronized String viewGames(JSONObject jsonObject) {
         PreparedStatement stmt;
-        String gameData=null;
+        String gameData;
         try {
+            OpenConnection();
+            stmt = connection.prepareStatement("SELECT * FROM game where player_1 = '"+jsonObject.getString("UserName")+"'");
+            ResultSet rs =stmt.executeQuery();
+            gameData = "[";
+            while(rs.next()){
+                gameData = gameData + "{\"GameNumber\":\""+rs.getString("Game_Number")+
+                        "\",\"OpponentPlayer\":\""+rs.getString(" Player_2")+
+                        "\",\"GameTime\":\""+rs.getString("Game_Time ")+"\"} ,";
+            }
+            gameData = gameData.substring(0,gameData.length()-1);
+            gameData = gameData + "]" ;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            gameData = null;
+        }
 
-            stmt = connection.prepareStatement("SELECT * FROM game");
+        return gameData;
+    }
+
+    @Override
+    public synchronized String viewGameFlow(JSONObject jsonObject) {
+        PreparedStatement stmt;
+        String gameData = null ;
+        try {
+            OpenConnection();
+            stmt = connection.prepareStatement("SELECT Game_Movements FROM game where player_1 = '"+
+                    jsonObject.getString("UserName")+
+                    "' AND Game_Number = '"+jsonObject.getString("GameNumber")+"'");
             ResultSet rs =stmt.executeQuery();
             if(rs.next()){
-                if(rs.getString("Player_1 ")==jsonObject.getString("UserName")){
-                    gameData="{\"GameNumber\":\""+rs.getString("Game_Number  ")+"\",\"OpponentPlayer\":\""+rs.getString(" Player_2")+"\",\"GameTime\":\""+rs.getString("Game_Time ")+"\"}";
-                }
-                else if(rs.getString("Player_2 ")==jsonObject.getString("UserName")){
-                    gameData=gameData="{\"GameNumber\":\""+rs.getString("Game_Number  ")+"\",\"OpponentPlayer\":\""+rs.getString(" Player_1")+"\",\"GameTime\":\""+rs.getString("Game_Time ")+"\"}";
-                }
-
-            }
-        } catch (SQLException e) {
+                gameData = rs.getString("Game_Movements");
+             }
+        }catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -139,12 +214,52 @@ public class DatabaseServices implements DatabaseServicesTerms {
     }
 
     @Override
-    public String viewGameFlow(JSONObject jsonObject) {
-        return null;
+    public synchronized String getTheServerLeaderBoard(JSONObject jsonObject) {
+
+        PreparedStatement stmt;
+        String playerData ;
+        try {
+            OpenConnection();
+            stmt = connection.prepareStatement("SELECT * FROM player ORDER BY TotalScore DESC ");
+            ResultSet rs =stmt.executeQuery();
+            playerData = "[";
+            while(rs.next()){
+                playerData = playerData + "{\"UserName\":\""+rs.getString("UserName")+
+                        "\",\"TotalGames\":\""+rs.getString("TotalGames")+
+                        "\",\"TotalScore\":\""+rs.getString("TotalScore")+"\"} ,";
+            }
+            playerData = playerData.substring(0,playerData.length()-1);
+            playerData = playerData + "]" ;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            playerData = null;
+        }
+
+        return playerData;
+
     }
 
     @Override
-    public String getTheServerLeaderBoard(JSONObject jsonObject) {
-        return null;
+    public synchronized String  getTheServerOnlinePlayers() {
+
+        String onlinePlayers ;
+        try {
+            onlinePlayers =
+                    "[{\"FunctionMode\":\" TheOnlinePlayers \" },";
+            for (Object obj : clientsVectorRealNames) {
+                if (clientsVectorStates.get(clientsVectorRealNames.indexOf(obj))) {
+                    onlinePlayers = onlinePlayers +
+                            "{\"PlayerName\":\""+obj+
+                            "\",\"PlayerIP\":\""+clientsVector.get(clientsVectorRealNames.indexOf(obj))+
+                            "\"},";
+                }
+            }
+            onlinePlayers = onlinePlayers.substring(0,onlinePlayers.length()-1);
+            onlinePlayers = onlinePlayers + "]";
+        }catch (Exception e){
+            onlinePlayers = null ;
+        }
+
+        return onlinePlayers;
     }
 }

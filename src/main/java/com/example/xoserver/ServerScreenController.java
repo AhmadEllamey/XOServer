@@ -35,8 +35,7 @@ public class ServerScreenController implements Initializable {
      - why we use initialize .
             The constructor is called first, then any @FXML annotated fields are populated,
              then initialize() is called. This means the constructor does not have access
-              to @FXML fields referring to components defined in the .
-               fxml file, while initialize() does have access to them.
+              to @FXML fields referring to components defined in the fxml file, while initialize() does have access to them.
 
      */
 
@@ -56,13 +55,15 @@ public class ServerScreenController implements Initializable {
 
         new Thread(() -> {
             try {
-                try{
-                    myServerSocket.close();
-                    System.out.println("This Socket Is Closed Now");
-                }catch (Exception e){
-                    e.printStackTrace();
-                    System.out.println("This Socket Is Not Opened To Be Closed");
-                }
+
+                    try{
+                        myServerSocket.close();
+                        System.out.println("This Socket Is Closed Now");
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        System.out.println("This Socket Is Not Opened To Be Closed");
+                    }
+
                 myServerSocket = new ServerSocket(5005);
                 Platform.runLater(() ->restartServerButton.setDisable(false));
                 Platform.runLater(() ->serverStatesToggleButton.setDisable(false));

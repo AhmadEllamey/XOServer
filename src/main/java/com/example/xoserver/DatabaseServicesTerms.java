@@ -23,6 +23,8 @@ public interface DatabaseServicesTerms {
 
     String getTheServerLeaderBoard(JSONObject jsonObject);
 
+    String getTheServerOnlinePlayers();
+
 
 }
 
